@@ -1,25 +1,48 @@
-# 🚀 Backend Engineering Assignment: Core API & Guardrails
+# 👨‍💼 Candidate Dashboard App
+
+A modern Candidate Management Dashboard built with React that enables recruiters or admins to efficiently manage candidate data with authentication and full CRUD capabilities.
+
+---
 
 ## 📌 Overview
-This project is a Spring Boot microservice that simulates a social media backend with:
-- Post & Comment APIs
-- Redis-based virality scoring
-- Concurrency-safe guardrails (atomic locks)
-- Notification batching system
+This application simulates a lightweight Applicant Tracking System (ATS) where users can securely log in and manage candidate profiles. It focuses on usability, clean UI, and scalable frontend architecture.
+
+---
+
+## 🚀 Key Features
+
+- 🔐 **Google Authentication**
+  - Secure login using Google OAuth
+- 📋 **Candidate Listing**
+  - View all candidates in a structured format
+- 🔍 **Candidate Details View**
+  - Click on a candidate to see complete details
+- ➕ **Add Candidate**
+  - Create new candidate profiles via form
+- ✏️ **Edit Candidate**
+  - Update existing candidate information
+- 🗑️ **Delete Candidate**
+  - Remove candidates with confirmation handling
+- 🔄 **Dynamic Routing**
+  - Smooth navigation using React Router
 
 ---
 
 ## 🛠 Tech Stack
-- Java 17
-- Spring Boot 3.x
-- PostgreSQL
-- Redis
+
+| Technology        | Purpose                          |
+|------------------|----------------------------------|
+| React            | Frontend Framework               |
+| React Router     | Navigation & Routing             |
+| Bootstrap 5.2    | UI Styling                       |
+| CSS Variables    | Theming & Custom Styling         |
+| Flexbox          | Layout Management                |
 
 ---
 
-## ⚙️ Setup Instructions
+## ⚙️ Getting Started
 
-### 1. Clone Repository
+### 1. Clone the Repository
 ```bash
 git clone <your-repo-url>
 cd <project-folder>
@@ -27,43 +50,21 @@ cd <project-folder>
 
 ---
 
-### 2. Configure PostgreSQL
-
-Create a database named:
-
-```sql
-social_db
-```
-
-Update `application.properties`:
-
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/social_db
-spring.datasource.username=postgres
-spring.datasource.password=password
+### 2. Install Dependencies
+```bash
+npm install
 ```
 
 ---
 
-### 3. Run Redis
-
+### 3. Start Development Server
 ```bash
-redis-server
+npm start
 ```
 
-Verify:
-
-```bash
-redis-cli ping
-# Expected output: PONG
+📍 Open your browser and navigate to:
 ```
-
----
-
-### 4. Run Application
-
-```bash
-./mvnw spring-boot:run
+http://localhost:3000
 ```
 
 ---
@@ -71,151 +72,59 @@ redis-cli ping
 ## 📂 Project Structure
 
 ```
-src/main/java/com/example/project
+src/
 │
-├── controller
-├── service
-├── repository
-├── entity
-└── scheduler
+├── components/       # Reusable UI components
+├── pages/            # Application pages (Home, Details, Form)
+├── routes/           # Route configurations
+├── services/         # API / data handling logic
+├── assets/           # Images, styles, static files
+└── App.js            # Root component
 ```
 
 ---
 
-## 🧱 Database Schema
+## 🧠 Design & Development Approach
 
-### User
-- id
-- username
-- isPremium
-
-### Post
-- id
-- authorId
-- content
-- createdAt
-
-### Comment
-- id
-- postId
-- authorId
-- content
-- depthLevel
-- createdAt
+- Component-based architecture for reusability
+- Separation of concerns (UI, logic, routing)
+- Clean and responsive UI using Bootstrap + Flexbox
+- Scalable folder structure for future backend/API integration
+- Emphasis on user experience and smooth navigation
 
 ---
 
-## 🌐 API Endpoints
+## ⚠️ Assumptions
 
-### Create Post
-```
-POST /api/posts
-```
-
-### Add Comment
-```
-POST /api/posts/{postId}/comments
-```
-
-### Like Post
-```
-POST /api/posts/{postId}/like
-```
+- Candidate data may be stored locally or via mock APIs
+- Google Authentication requires proper API key setup (if implemented)
+- No backend persistence unless integrated separately
 
 ---
 
-## 🔥 Redis Virality Engine
+## 🚧 Future Improvements
 
-| Action         | Score |
-|---------------|------|
-| Bot Reply     | +1   |
-| Human Like    | +20  |
-| Human Comment | +50  |
-
-Redis Key:
-
-```
-post:{id}:virality_score
-```
+- 🔗 Backend integration (Node.js / Spring Boot)
+- 🗄️ Database connectivity (MongoDB / PostgreSQL)
+- 🔍 Search & filtering functionality
+- 📊 Pagination for large datasets
+- 🔐 Role-based access control (Admin/User)
+- ☁️ Deployment (Vercel / Netlify)
 
 ---
 
-## 🔒 Atomic Locks
+## ✍️ Author
 
-### Horizontal Cap (Max 100 Bot Replies)
-- Redis Key: `post:{id}:bot_count`
-- Uses atomic `INCR`
-- Reject if count > 100
-
-### Vertical Cap (Max Depth 20)
-- Reject if `depthLevel > 20`
-
-### Cooldown Cap (10 minutes)
-- Key: `cooldown:bot_{id}:human_{id}`
-- Uses TTL
-- Prevents repeated interaction
-
----
-
-## 🧠 Thread Safety
-
-Redis operations like `INCR` are atomic, ensuring:
-- No race conditions
-- Horizontal cap never exceeds 100 under concurrency
-
----
-
-## 🔔 Notification Engine
-
-### Throttling Logic
-- If user received notification in last 15 mins → Store in Redis List
-- Else → Send immediately
-
-Keys:
-
-```
-user:{id}:pending_notifs
-cooldown:notif:{id}
-```
-
----
-
-## ⏰ Scheduler (CRON)
-
-Runs every 5 minutes:
-- Fetch pending notifications
-- Count interactions
-- Log summary:
-  ```
-  Summarized Notification: X interactions
-  ```
-- Clear Redis list
-
----
-
-## 🧪 Edge Cases
-
-### Concurrency Test
-- 200 simultaneous requests
-- Only 100 allowed
-
-### Statelessness
-- No in-memory storage
-- Everything handled via Redis
-
-### Data Integrity
-- DB writes only after Redis validation
-
----
-
-## 📬 Postman
-
-Import Postman collection JSON to test APIs.
+**Mukul**
 
 ---
 
 ## 🏁 Conclusion
 
-- Redis → Gatekeeper  
-- PostgreSQL → Source of truth  
-- System → Stateless & scalable
+This project demonstrates:
+- Strong React fundamentals
+- Clean UI/UX design
+- Scalable frontend architecture
+- Real-world CRUD application structure
+
+It can be extended into a full-fledged recruitment management system with backend integration.
