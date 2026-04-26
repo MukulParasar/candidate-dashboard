@@ -1,76 +1,138 @@
-# Creating a Candidate Dashboard App with React
+# 🚀 Backend Engineering Assignment: Core API & Guardrails
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 📌 Overview
+This project is a Spring Boot microservice that simulates a social media backend with:
+- Post & Comment APIs
+- Redis-based virality scoring
+- Concurrency-safe guardrails (atomic locks)
+- Notification batching system
 
-## Available Scripts
+## 🛠 Tech Stack
+- Java 17
+- Spring Boot 3.x
+- PostgreSQL
+- Redis
 
-In the project directory, you can run:
+---
 
-### `npm install`
+## ⚙️ Setup Instructions
 
-### `npm start`
+### 1. Clone Repository
+```bash
+git clone <your-repo-url>
+cd <project-folder>
+2. Configure PostgreSQL
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Create database:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+social_db
 
-### Links
+Update application.properties:
 
-- Solution URL: [Source Code](https://github.com/zaidansari42/candidate-dashboard)
-- Live Site URL: [Candidate App](https://canididates.netlify.app)
+spring.datasource.url=jdbc:postgresql://localhost:5432/social_db
+spring.datasource.username=postgres
+spring.datasource.password=password
+3. Run Redis
+redis-server
 
-## Table of contents
+Verify:
 
-- [Overview](#overview)
-  - [The challenge](#the-challenge)
-  - [Screenshot](#screenshot)
-- [My process](#my-process)
-  - [Built with](#built-with)
-- [Author](#author)
+redis-cli ping
+# Output: PONG
+4. Run Application
+./mvnw spring-boot:run
+📂 Project Structure
+src/main/java/com/example/project
+│
+├── controller
+├── service
+├── repository
+├── entity
+└── scheduler
+🧱 Database Schema
+User
+id
+username
+isPremium
+Post
+id
+authorId
+content
+createdAt
+Comment
+id
+postId
+authorId
+content
+depthLevel
+createdAt
+🌐 API Endpoints
+Create Post
+POST /api/posts
+Add Comment
+POST /api/posts/{postId}/comments
+Like Post
+POST /api/posts/{postId}/like
+🔥 Redis Virality Engine
+Action	Score
+Bot Reply	+1
+Human Like	+20
+Human Comment	+50
 
-## Overview
+Redis Key:
 
-### The challenge
+post:{id}:virality_score
+🔒 Atomic Locks
+Horizontal Cap (Max 100 Bot Replies)
+Redis Key: post:{id}:bot_count
+Uses atomic INCR
+Reject if count > 100
+Vertical Cap (Max Depth 20)
+Reject if depthLevel > 20
+Cooldown Cap (10 minutes)
+Key: cooldown:bot_{id}:human_{id}
+Uses TTL
+Prevents repeated interaction
+🧠 Thread Safety
 
-Users should be able to:
+Redis operations like INCR are atomic, ensuring:
 
-- Login via their Google Account
-- See the list of candidates
-- On Clicking be able to view the details of the selected candidate
-- An ADD button to create a new candidate
-- An Edit button to Edit the exisiting candidate details
-- A delete Button to delete a selected candidate
+No race conditions
+Horizontal cap never exceeds 100 under concurrency
+🔔 Notification Engine
+Throttling Logic
+If user received notification in last 15 mins:
+→ Store in Redis List
+Else:
+→ Send immediately
 
-### Screenshot
+Keys:
 
-Home Screen
+user:{id}:pending_notifs
+cooldown:notif:{id}
+⏰ Scheduler (CRON)
 
-![](./public/project1.PNG)
+Runs every 5 minutes:
 
-New Form
+Fetch pending notifications
+Count interactions
+Log summary:
+Summarized Notification: X interactions
+Clear Redis list
+🧪 Edge Cases
+Concurrency Test
+200 simultaneous requests
+Only 100 allowed
+Statelessness
+No in-memory storage
+Everything handled via Redis
+Data Integrity
+DB writes only after Redis validation
+📬 Postman
 
-![](./public/project2.PNG)
+Import Postman collection JSON to test APIs.
 
-Candidate Details
-
-![](./public/project3.PNG)
-
-Edit Details
-
-![](./public/project4.PNG)
-
-### Built with
-
-- React App
-- CSS custom properties
-- BootStrap 5.2
-- React Routing
-- Flexbox
-
-## Author
-
-- Website - [Zaid Ansari](https://zaidansari42.netlify.app/)
-- LinkedIn- [@zaidansari42](https://www.linkedin.com/in/zaid42/)
-- Twitter - [@zaidansari42](https://www.twitter.com/zaidansari42)
+🏁 Conclusion
+Redis → Gatekeeper
+PostgreSQL → Source of truth
+System → Stateless & scalable
